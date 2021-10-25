@@ -12,7 +12,7 @@ async function getAll() {
 
     return contacts
   } catch (error) {
-    console.log(error)
+    throw new Error(error)
   }
 };
 

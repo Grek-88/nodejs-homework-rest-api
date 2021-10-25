@@ -8,12 +8,12 @@ async function findContactById(contactId) {
     )
 
     if (!selectContact) {
-      return new Error(`Contact with id=${contactId} not found`)
+      throw new Error(`Contact with id=${contactId} not found`)
     }
 
     return selectContact
   } catch (error) {
-    return error
+    throw new Error(error)
   }
 }
 

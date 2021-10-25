@@ -1,17 +1,16 @@
 /* eslint-disable no-useless-catch */
 /* eslint-disable semi */
 const fs = require('fs/promises');
-const { v4 } = require('uuid');
 
 const path = require('path');
 const contacts = path.join(__dirname, './contacts.json');
 const getAll = require('./getAll');
 const findContactById = require('./findContactById');
+const addCont = require('./addCont');
+const updateCont = require('./updateCont');
 
 const listContacts = async (req, res) => {
   try {
-    // const data = await fs.readFile(contacts);
-    // const contactsData = JSON.parse(data);
 
     const contactsData = await getAll();
 
@@ -32,14 +31,9 @@ const getContactById = async (req, res) => {
 
     const selectContact = await findContactById(contactId);
 
-    // const contactsData = await listContacts();
-    // const selectContact = contactsData.find(
-    //   (el) => el.id === contactId || el.id === Number(contactId)
-    // );
-
-    // if (!selectContact) {
-    //   res.status(404).send({ message: 'Not found' });
-    // }
+    if (!selectContact) {
+      res.status(404).send({ message: 'Not found' });
+    }
 
     res.send({
       status: 'success',
@@ -57,57 +51,44 @@ const removeContact = async (req, res) => {
     const { contactId } = req.params;
     const contactsData = await getAll();
 
-    const delContact = await findContactById(contactId);
-
     const newContacts = contactsData.filter(
       (el) => el.id !== contactId && el.id !== Number(contactId)
     );
 
-    const newContatcsString = JSON.stringify(newContacts);
-    await fs.writeFile(contacts, newContatcsString);
-
+    await fs.writeFile(contacts, JSON.stringify(newContacts));
     res.send({ message: 'contact deleted' });
+
+    const delContact = await findContactById(contactId);
     return delContact;
   } catch (error) {
     res.status(404).send({ message: 'Not found' });
   }
 };
 
-const addContact = async (req, res, body) => {
+const addContact = async (req, res) => {
   try {
-    const newContact = { name: body.name, email: body.email, phone: body.phone, id: v4() };
+    if (!req.body.name || !req.body.email || !req.body.phone) {
+      return res.status(400).send({ message: 'missing required name field' })
+    };
+    const newContact = await addCont(req.body);
 
-    const contactsData = await listContacts();
-    const newContacts = [...contactsData, newContact];
-
-    const newContatcsString = JSON.stringify(newContacts);
-
-    await fs.writeFile(contacts, newContatcsString);
+    res.send(201, newContact);
     return newContact;
   } catch (error) {
     res.status(404).send({ message: 'Not found' });
   }
 };
 
-const updateContact = async (contactId, body, res) => {
+const updateContact = async (req, res) => {
   try {
-    const contactsData = await listContacts();
-    let selectContact = contactsData.find(
-      (el) => el.id === contactId || el.id === Number(contactId)
-    );
+    if (!req.body) {
+      return res.status(400).send({ message: 'missing fields' })
+    }
+    const { contactId } = req.params;
+    const updateContact = await updateCont(contactId, req.body);
 
-    // if (!selectContact || !body) {
-    // const errorMess = !selectContact ? `Contact with id = ${contactId} not found` : 'Body for contact not found';
-    // throw new Error(errorMess);
-    // };
-
-    selectContact = { ...selectContact, ...body };
-
-    const newContatcsString = JSON.stringify(contactsData);
-
-    await fs.writeFile(contacts, newContatcsString);
-
-    return selectContact;
+    res.send(updateContact);
+    return updateContact;
   } catch (error) {
     res.status(404).send({ message: 'Not found' });
   }

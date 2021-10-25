@@ -4,7 +4,6 @@ const path = require('path')
 const contactsPath = path.join(__dirname, './contacts.json')
 
 async function getAll() {
-  // eslint-disable-next-line no-useless-catch
   try {
     const data = await fs.readFile(contactsPath)
 

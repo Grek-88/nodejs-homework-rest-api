@@ -5,7 +5,6 @@ const getAll = require('./getAll')
 const contactsPath = path.join(__dirname, './contacts.json')
 
 async function updateCont(contactId, body) {
-  // eslint-disable-next-line no-useless-catch
   try {
     const contacts = await getAll()
     const index = contacts.findIndex((el) => el.id === contactId || el.id === Number(contactId))

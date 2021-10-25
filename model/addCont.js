@@ -6,7 +6,6 @@ const { v4 } = require('uuid')
 const getAll = require('./getAll')
 
 async function addCont({ name, email, phone }) {
-  // eslint-disable-next-line no-useless-catch
   try {
     const newContact = { name, email, phone, id: v4() }
 

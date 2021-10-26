@@ -1,15 +1,91 @@
-// const fs = require('fs/promises')
-// const contacts = require('./contacts.json')
+const schema = require('../schemaValidate/contactsValidate')
 
-const listContacts = async () => {}
+const getAll = require('./getAll')
+const findContactById = require('./findContactById')
+const addCont = require('./addCont')
+const updateCont = require('./updateCont')
+const delCont = require('./delCont')
 
-const getContactById = async (contactId) => {}
+const listContacts = async (req, res, next) => {
+  const contactsData = await getAll()
 
-const removeContact = async (contactId) => {}
+  res.send({
+    status: 'success',
+    code: 200,
+    result: contactsData
+  })
+  return contactsData
+}
 
-const addContact = async (body) => {}
+const getContactById = async (req, res, next) => {
+  const { contactId } = req.params
 
-const updateContact = async (contactId, body) => {}
+  const selectContact = await findContactById(contactId)
+
+  if (!selectContact) {
+    const error = new Error(`Contact with id=${contactId} not found`)
+    error.status = 404
+    throw error
+  }
+
+  res.send({
+    status: 'success',
+    code: 200,
+    result: selectContact
+  })
+  return selectContact
+}
+
+const removeContact = async (req, res, next) => {
+  const { contactId } = req.params
+  const deleteContact = await delCont(contactId)
+  if (!deleteContact) {
+    const error = new Error(`Contact with id=${contactId} not found`)
+    error.status = 404
+    throw error
+  }
+
+  res.send({ message: 'contact deleted' })
+
+  return deleteContact
+}
+
+const addContact = async (req, res, next) => {
+  const { error } = schema.validate(req.body)
+  if (error) {
+    const err = new Error(error.message)
+    err.status = 400
+    throw err
+  };
+
+  const newContact = await addCont(req.body)
+
+  res.status(201).send(newContact)
+  return newContact
+}
+
+const updateContact = async (req, res, next) => {
+  if (!req.body) {
+    return res.status(400).send({ message: 'missing fields' })
+  }
+  const { error } = schema.validate(req.body)
+  if (error) {
+    const err = new Error(error.message)
+    err.status = 400
+    throw err
+  };
+
+  const { contactId } = req.params
+  const updateContact = await updateCont(contactId, req.body)
+  if (!updateContact) {
+    const error = new Error(`Contact with id=${contactId} not found`)
+    error.status = 404
+    throw error
+  }
+
+  res.send(updateContact)
+  return updateContact
+}
 
 module.exports = {
   listContacts,

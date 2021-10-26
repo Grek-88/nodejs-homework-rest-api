@@ -6,19 +6,15 @@ const { v4 } = require('uuid')
 const getAll = require('./getAll')
 
 async function addCont({ name, email, phone }) {
-  try {
-    const newContact = { name, email, phone, id: v4() }
+  const newContact = { name, email, phone, id: v4() }
 
-    const contacts = await getAll()
-    const newContacts = [...contacts, newContact]
+  const contacts = await getAll()
+  const newContacts = [...contacts, newContact]
 
-    const newContatcsString = JSON.stringify(newContacts)
+  const newContatcsString = JSON.stringify(newContacts)
 
-    await fs.writeFile(contactsPath, newContatcsString)
-    return newContact
-  } catch (error) {
-    throw new Error(error)
-  }
+  await fs.writeFile(contactsPath, newContatcsString)
+  return newContact
 }
 
 module.exports = addCont

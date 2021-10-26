@@ -6,22 +6,18 @@ const getAll = require('./getAll')
 const contactsPath = path.join(__dirname, './contacts.json')
 
 async function delCont(contactId) {
-  try {
-    const contacts = await getAll()
+  const contacts = await getAll()
 
-    const delContact = await findContactById(contactId)
+  const delContact = await findContactById(contactId)
 
-    const newContacts = contacts.filter(
-      (el) => el.id !== contactId && el.id !== Number(contactId)
-    )
+  const newContacts = contacts.filter(
+    (el) => el.id !== contactId && el.id !== Number(contactId)
+  )
 
-    const newContatcsString = JSON.stringify(newContacts)
-    await fs.writeFile(contactsPath, newContatcsString)
+  const newContatcsString = JSON.stringify(newContacts)
+  await fs.writeFile(contactsPath, newContatcsString)
 
-    return delContact
-  } catch (error) {
-    throw new Error(error)
-  }
+  return delContact
 }
 
 module.exports = delCont

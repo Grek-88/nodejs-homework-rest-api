@@ -1,16 +1,17 @@
 const express = require('express')
 const router = express.Router()
 
+const controllerWrapper = require('../../middlewares/controllerWrapper')
 const cntrl = require('../../model')
 
-router.get('/', cntrl.listContacts)
+router.get('/', controllerWrapper(cntrl.listContacts))
 
-router.get('/:contactId', cntrl.getContactById)
+router.get('/:contactId', controllerWrapper(cntrl.getContactById))
 
-router.post('/', cntrl.addContact)
+router.post('/', controllerWrapper(cntrl.addContact))
 
-router.delete('/:contactId', cntrl.removeContact)
+router.delete('/:contactId', controllerWrapper(cntrl.removeContact))
 
-router.put('/:contactId', cntrl.updateContact)
+router.put('/:contactId', controllerWrapper(cntrl.updateContact))
 
 module.exports = router

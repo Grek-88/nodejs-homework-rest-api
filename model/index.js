@@ -1,8 +1,9 @@
-const schema = require('../schemaValidate/contactsValidate')
+// const schema = require('../middlewares/contactsValidate')
+const { Contact } = require('./contactSchema')
 
 const getAll = require('./getAll')
 const findContactById = require('./findContactById')
-const addCont = require('./addCont')
+// const addCont = require('./addCont')
 const updateCont = require('./updateCont')
 const delCont = require('./delCont')
 
@@ -51,14 +52,14 @@ const removeContact = async (req, res, next) => {
 }
 
 const addContact = async (req, res, next) => {
-  const { error } = schema.validate(req.body)
-  if (error) {
-    const err = new Error(error.message)
-    err.status = 400
-    throw err
-  };
-
-  const newContact = await addCont(req.body)
+  // const { error } = schema.validate(req.body)
+  // if (error) {
+  //   const err = new Error(error.message)
+  //   err.status = 400
+  //   throw err
+  // };
+  // const newContact = await addCont(req.body)
+  const newContact = await Contact.create(req.body)
 
   res.status(201).send(newContact)
   return newContact
@@ -68,12 +69,12 @@ const updateContact = async (req, res, next) => {
   if (!req.body) {
     return res.status(400).send({ message: 'missing fields' })
   }
-  const { error } = schema.validate(req.body)
-  if (error) {
-    const err = new Error(error.message)
-    err.status = 400
-    throw err
-  };
+  // const { error } = schema.validate(req.body)
+  // if (error) {
+  //   const err = new Error(error.message)
+  //   err.status = 400
+  //   throw err
+  // };
 
   const { contactId } = req.params
   const updateContact = await updateCont(contactId, req.body)

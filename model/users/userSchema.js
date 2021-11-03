@@ -24,19 +24,14 @@ const userSchema = Schema({
 
 const User = model('user', userSchema)
 
-const joiSchema = Joi.object({
-  name: Joi.string()
-    .min(3)
-    .max(30)
-    .required(),
-
+const joiUserSchema = Joi.object({
   email: Joi.string()
     .email({ minDomainSegments: 2 })
     .required(),
 
-  phone: Joi.number().required(),
-
-  favorite: Joi.boolean()
+  password: Joi.string()
+    .min(6)
+    .required(),
 })
 
-module.exports = { User, joiSchema }
+module.exports = { User, joiUserSchema }

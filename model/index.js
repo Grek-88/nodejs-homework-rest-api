@@ -1,13 +1,7 @@
-const schema = require('../schemaValidate/contactsValidate')
-
-const getAll = require('./getAll')
-const findContactById = require('./findContactById')
-const addCont = require('./addCont')
-const updateCont = require('./updateCont')
-const delCont = require('./delCont')
+const { Contact } = require('./contactSchema')
 
 const listContacts = async (req, res, next) => {
-  const contactsData = await getAll()
+  const contactsData = await Contact.find({})
 
   res.send({
     status: 'success',
@@ -20,7 +14,7 @@ const listContacts = async (req, res, next) => {
 const getContactById = async (req, res, next) => {
   const { contactId } = req.params
 
-  const selectContact = await findContactById(contactId)
+  const selectContact = await Contact.findById(contactId)
 
   if (!selectContact) {
     const error = new Error(`Contact with id=${contactId} not found`)
@@ -38,7 +32,7 @@ const getContactById = async (req, res, next) => {
 
 const removeContact = async (req, res, next) => {
   const { contactId } = req.params
-  const deleteContact = await delCont(contactId)
+  const deleteContact = await Contact.findByIdAndDelete(contactId)
   if (!deleteContact) {
     const error = new Error(`Contact with id=${contactId} not found`)
     error.status = 404
@@ -51,14 +45,7 @@ const removeContact = async (req, res, next) => {
 }
 
 const addContact = async (req, res, next) => {
-  const { error } = schema.validate(req.body)
-  if (error) {
-    const err = new Error(error.message)
-    err.status = 400
-    throw err
-  };
-
-  const newContact = await addCont(req.body)
+  const newContact = await Contact.create(req.body)
 
   res.status(201).send(newContact)
   return newContact
@@ -68,15 +55,29 @@ const updateContact = async (req, res, next) => {
   if (!req.body) {
     return res.status(400).send({ message: 'missing fields' })
   }
-  const { error } = schema.validate(req.body)
-  if (error) {
-    const err = new Error(error.message)
-    err.status = 400
-    throw err
-  };
 
   const { contactId } = req.params
-  const updateContact = await updateCont(contactId, req.body)
+
+  const updateContact = await Contact.findByIdAndUpdate(contactId, req.body, { new: true })
+  if (!updateContact) {
+    const error = new Error(`Contact with id=${contactId} not found`)
+    error.status = 404
+    throw error
+  }
+
+  res.send(updateContact)
+  return updateContact
+}
+
+const updateStatusContact = async (req, res, next) => {
+  if (!req.body || req.body.favorite === undefined) {
+    return res.status(400).send({ message: 'missing field favorite' })
+  }
+
+  const { contactId } = req.params
+  const { favorite } = req.body
+
+  const updateContact = await Contact.findByIdAndUpdate(contactId, { favorite }, { new: true })
   if (!updateContact) {
     const error = new Error(`Contact with id=${contactId} not found`)
     error.status = 404
@@ -93,4 +94,5 @@ module.exports = {
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact
 }

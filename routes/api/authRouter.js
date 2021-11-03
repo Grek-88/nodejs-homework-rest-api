@@ -13,7 +13,8 @@ const { joiUserSchema } = require('../../model/users/userSchema')
 /* */
 router.post('/signup', validate(joiUserSchema), controllerWrapper(cntrl.signup))
 
-// router.post('/login', validate(joiUserSchema), controllerWrapper(cntrl.login))
+router.post('/login', validate(joiUserSchema), controllerWrapper(cntrl.login))
+
 // router.get('/logout', controllerWrapper(cntrl.logout))
 /* */
 

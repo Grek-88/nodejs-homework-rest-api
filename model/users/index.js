@@ -46,8 +46,21 @@ const logout = async (req, res) => {
   res.status(204).send('No Content')
 }
 
+const current = async (req, res) => {
+  const user = await User.findById(req.user._id)
+
+  res.send({
+    status: 'Success',
+    user: {
+      email: `${user.email}`,
+      subscription: `${user.subscription}`
+    }
+  })
+}
+
 module.exports = {
   signup,
   login,
-  logout
+  logout,
+  current
 }

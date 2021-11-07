@@ -1,12 +1,12 @@
 const { User } = require('./userSchema')
 const bcrypt = require('bcryptjs')
+const { Conflict, BadRequest } = require('http-errors')
+const jwt = require('jsonwebtoken')
 
-const signup = async (req, res, next) => {
+const signup = async (req, res) => {
   const { email, password } = req.body
   const user = await User.findOne({ email })
-  if (user) {
-    res.status(409).send({ message: 'Email in use' })
-  }
+  if (user) { throw new Conflict('Email in use') }
 
   const hashPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
   const result = await User.create({ email, password: hashPassword })
@@ -17,21 +17,24 @@ const signup = async (req, res, next) => {
   })
 }
 
-const login = async (req, res, next) => {
+const login = async (req, res) => {
   const { email, password } = req.body
   const user = await User.findOne({ email })
-  if (!user) { return res.status(401).send({ message: 'Email or password is wrong' }) }
+  if (!user) { throw new BadRequest('Email or password is wrong') }
 
   const hashPassword = user.password
   const compareResult = bcrypt.compareSync(password, hashPassword)
-  if (!compareResult) { return res.status(401).send({ message: 'Email or password is wrong' }) }
+  if (!compareResult) { throw new BadRequest('Email or password is wrong') }
 
-  const token = 'qweqwe.qweqwe.qweqwe'
+  const payload = {
+    id: user._id
+  }
+  const { SECRET_KEY } = process.env
+  const token = jwt.sign(payload, SECRET_KEY)
 
   res.send({
     status: 'Success',
-    token,
-    user
+    token
   })
 }
 

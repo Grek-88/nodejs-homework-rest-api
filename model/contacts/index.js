@@ -2,7 +2,7 @@ const { Contact } = require('./contactSchema')
 const { NotFound, BadRequest } = require('http-errors')
 
 const listContacts = async (req, res, next) => {
-  const contactsData = await Contact.find({})
+  const contactsData = await Contact.find({ owner: req.user._id }).populate('owner', '_id email')
 
   res.send({
     status: 'success',
@@ -38,7 +38,8 @@ const removeContact = async (req, res, next) => {
 }
 
 const addContact = async (req, res, next) => {
-  const newContact = await Contact.create(req.body)
+  const request = { ...req.body, owner: req.user._id }
+  const newContact = await Contact.create(request)
 
   res.status(201).send(newContact)
   return newContact

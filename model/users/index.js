@@ -32,13 +32,22 @@ const login = async (req, res) => {
   const { SECRET_KEY } = process.env
   const token = jwt.sign(payload, SECRET_KEY)
 
+  await User.findByIdAndUpdate(user._id, { token })
+
   res.send({
     status: 'Success',
     token
   })
 }
 
+const logout = async (req, res) => {
+  await User.findByIdAndUpdate(req.user._id, { token: null })
+
+  res.status(204).send('No Content')
+}
+
 module.exports = {
   signup,
-  login
+  login,
+  logout
 }

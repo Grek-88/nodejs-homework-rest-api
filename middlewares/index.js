@@ -1,7 +1,9 @@
 const controllerWrapper = require('./controllerWrapper')
-const contactsValidate = require('./contactsValidate')
+const validate = require('./validate')
+const authenticated = require('./authenticated')
 
 module.exports = {
   controllerWrapper,
-  contactsValidate
+  validate,
+  authenticated
 }

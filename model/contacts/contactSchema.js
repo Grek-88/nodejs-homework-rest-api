@@ -16,11 +16,15 @@ const contactSchema = Schema({
     type: Boolean,
     default: false,
   },
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+  }
 }, { versionKey: false, timestamps: true })
 
 const Contact = model('contact', contactSchema)
 
-const joiSchema = Joi.object({
+const joiContactSchema = Joi.object({
   name: Joi.string()
     .min(3)
     .max(30)
@@ -35,4 +39,4 @@ const joiSchema = Joi.object({
   favorite: Joi.boolean()
 })
 
-module.exports = { Contact, joiSchema }
+module.exports = { Contact, joiContactSchema }

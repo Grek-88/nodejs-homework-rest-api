@@ -1,7 +1,8 @@
 const { Contact } = require('./contactSchema')
+const { NotFound, BadRequest } = require('http-errors')
 
 const listContacts = async (req, res, next) => {
-  const contactsData = await Contact.find({})
+  const contactsData = await Contact.find({ owner: req.user._id }).populate('owner', '_id email')
 
   res.send({
     status: 'success',
@@ -16,11 +17,7 @@ const getContactById = async (req, res, next) => {
 
   const selectContact = await Contact.findById(contactId)
 
-  if (!selectContact) {
-    const error = new Error(`Contact with id=${contactId} not found`)
-    error.status = 404
-    throw error
-  }
+  if (!selectContact) { throw new NotFound(`Contact with id=${contactId} not found`) }
 
   res.send({
     status: 'success',
@@ -33,11 +30,7 @@ const getContactById = async (req, res, next) => {
 const removeContact = async (req, res, next) => {
   const { contactId } = req.params
   const deleteContact = await Contact.findByIdAndDelete(contactId)
-  if (!deleteContact) {
-    const error = new Error(`Contact with id=${contactId} not found`)
-    error.status = 404
-    throw error
-  }
+  if (!deleteContact) { throw new NotFound(`Contact with id=${contactId} not found`) }
 
   res.send({ message: 'contact deleted' })
 
@@ -45,44 +38,33 @@ const removeContact = async (req, res, next) => {
 }
 
 const addContact = async (req, res, next) => {
-  const newContact = await Contact.create(req.body)
+  const request = { ...req.body, owner: req.user._id }
+  const newContact = await Contact.create(request)
 
   res.status(201).send(newContact)
   return newContact
 }
 
 const updateContact = async (req, res, next) => {
-  if (!req.body) {
-    return res.status(400).send({ message: 'missing fields' })
-  }
+  if (!req.body) { throw new BadRequest('missing fields') }
 
   const { contactId } = req.params
 
   const updateContact = await Contact.findByIdAndUpdate(contactId, req.body, { new: true })
-  if (!updateContact) {
-    const error = new Error(`Contact with id=${contactId} not found`)
-    error.status = 404
-    throw error
-  }
+  if (!updateContact) { throw new NotFound(`Contact with id=${contactId} not found`) }
 
   res.send(updateContact)
   return updateContact
 }
 
 const updateStatusContact = async (req, res, next) => {
-  if (!req.body || req.body.favorite === undefined) {
-    return res.status(400).send({ message: 'missing field favorite' })
-  }
+  if (!req.body || req.body.favorite === undefined) { throw new BadRequest('missing field favorite') }
 
   const { contactId } = req.params
   const { favorite } = req.body
 
   const updateContact = await Contact.findByIdAndUpdate(contactId, { favorite }, { new: true })
-  if (!updateContact) {
-    const error = new Error(`Contact with id=${contactId} not found`)
-    error.status = 404
-    throw error
-  }
+  if (!updateContact) { throw new NotFound(`Contact with id=${contactId} not found`) }
 
   res.send(updateContact)
   return updateContact

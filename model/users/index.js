@@ -2,6 +2,7 @@ const { User } = require('./userSchema')
 const bcrypt = require('bcryptjs')
 const { Conflict, BadRequest } = require('http-errors')
 const jwt = require('jsonwebtoken')
+const gravatar = require('gravatar')
 
 const signup = async (req, res) => {
   const { email, password } = req.body
@@ -9,7 +10,10 @@ const signup = async (req, res) => {
   if (user) { throw new Conflict('Email in use') }
 
   const hashPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-  const result = await User.create({ email, password: hashPassword })
+
+  const defaultAvatar = gravatar.url(email)
+
+  const result = await User.create({ email, password: hashPassword, avatarURL: `http:${defaultAvatar}` })
 
   res.status(201).send({
     status: 'Success',

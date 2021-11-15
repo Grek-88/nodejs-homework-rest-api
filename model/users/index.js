@@ -2,6 +2,10 @@ const { User } = require('./userSchema')
 const bcrypt = require('bcryptjs')
 const { Conflict, BadRequest } = require('http-errors')
 const jwt = require('jsonwebtoken')
+const gravatar = require('gravatar')
+const fs = require('fs/promises')
+const path = require('path')
+const Jimp = require('jimp')
 
 const signup = async (req, res) => {
   const { email, password } = req.body
@@ -9,7 +13,10 @@ const signup = async (req, res) => {
   if (user) { throw new Conflict('Email in use') }
 
   const hashPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-  const result = await User.create({ email, password: hashPassword })
+
+  const defaultAvatar = gravatar.url(email, { protocol: 'http' })
+
+  const result = await User.create({ email, password: hashPassword, avatarURL: defaultAvatar })
 
   res.status(201).send({
     status: 'Success',
@@ -58,9 +65,39 @@ const current = async (req, res) => {
   })
 }
 
+const avatarsDir = path.join(__dirname, '../../', 'public/avatars')
+
+const updateAvatar = async (req, res) => {
+  const { path: tempPath, originalname } = req.file
+
+  const newNameAvatar = `${req.user._id.toString()}.${originalname}`
+  const uploadPath = path.join(avatarsDir, newNameAvatar)
+
+  try {
+    const file = await Jimp.read(tempPath)
+    await file.resize(250, 250).write(tempPath)
+
+    await fs.rename(tempPath, uploadPath)
+
+    const avatarURL = `/avatars/${newNameAvatar}`
+    await User.findByIdAndUpdate(req.user._id, { avatarURL })
+
+    res.send({
+      status: 'Success',
+      data: {
+        result: avatarURL
+      }
+    })
+  } catch (error) {
+    await fs.unlink(tempPath)
+    throw error
+  }
+}
+
 module.exports = {
   signup,
   login,
   logout,
-  current
+  current,
+  updateAvatar
 }

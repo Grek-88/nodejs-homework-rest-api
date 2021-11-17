@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const { controllerWrapper, validate, authenticated } = require('../../middlewares')
-const cntrl = require('../../model/contacts')
+const cntrl = require('../../controllers/contacts')
 
 const { joiContactSchema } = require('../../model/contacts/contactSchema')
 

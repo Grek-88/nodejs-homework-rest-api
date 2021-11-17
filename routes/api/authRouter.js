@@ -2,11 +2,15 @@ const express = require('express')
 const router = express.Router()
 
 const { controllerWrapper, validate, authenticated, upload } = require('../../middlewares')
-const cntrl = require('../../model/users')
+const cntrl = require('../../controllers/users')
 
 const { joiUserSchema } = require('../../model/users/userSchema')
 
 router.post('/signup', validate(joiUserSchema), controllerWrapper(cntrl.signup))
+
+router.get('/verify/:verifyToken', controllerWrapper(cntrl.verify))
+
+router.post('/verify', controllerWrapper(cntrl.resendEmailVerify))
 
 router.post('/login', validate(joiUserSchema), controllerWrapper(cntrl.login))
 
